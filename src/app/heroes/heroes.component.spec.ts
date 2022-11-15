@@ -40,5 +40,18 @@ describe("HeroesComponent", () => {
       );
       expect(isDeleted).toBe(true);
     });
+
+    it("should call deleteHero", () => {
+      // Arrange
+      mockHeroService.deleteHero.and.returnValue(of(true));
+      component.heroes = [...HEROES];
+
+      // Act
+      const deletedHero = component.heroes[3];
+      component.delete(deletedHero);
+
+      // Assert
+      expect(mockHeroService.deleteHero).toHaveBeenCalledWith(deletedHero);
+    });
   });
 });
