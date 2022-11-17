@@ -1,12 +1,13 @@
 import { NO_ERRORS_SCHEMA } from "@angular/core";
 import { ComponentFixture, TestBed } from "@angular/core/testing";
+import { By } from "@angular/platform-browser";
 import { of } from "rxjs";
 import { Hero } from "../hero";
 import { HeroService } from "../hero.service";
+import { HeroComponent } from "../hero/hero.component";
 import { HeroesComponent } from "./heroes.component";
 
-describe("HeroesComponent (Shallow)", () => {
-  let component: HeroesComponent;
+describe("HeroesComponent (Deep)", () => {
   let fixture: ComponentFixture<HeroesComponent>;
   let HEROES: Hero[];
   let mockHeroService;
@@ -27,23 +28,27 @@ describe("HeroesComponent (Shallow)", () => {
     ]);
 
     TestBed.configureTestingModule({
-      declarations: [HeroesComponent],
+      declarations: [HeroesComponent, HeroComponent],
       providers: [{ provide: HeroService, useValue: mockHeroService }],
-      schemas: [NO_ERRORS_SCHEMA],
     });
-
-    fixture = TestBed.createComponent(HeroesComponent);
-    component = fixture.componentInstance;
   });
 
-  it("should set the heroes property", () => {
+  it("should create a hero component for each hero", () => {
     // Arrange
+    fixture = TestBed.createComponent(HeroesComponent);
     mockHeroService.getHeroes.and.returnValue(of(HEROES));
 
-    // Act
+    // Act (execute ngOninit)
     fixture.detectChanges();
+    const heroesDEs = fixture.debugElement.queryAll(
+      By.directive(HeroComponent)
+    );
 
     // Assert
-    expect(component.heroes).toEqual(HEROES);
+    expect(heroesDEs.length).toBe(4);
+
+    heroesDEs.forEach((element, i) => {
+      expect(element.componentInstance.hero).toEqual(HEROES[i]);
+    });
   });
 });
