@@ -31,11 +31,12 @@ describe("HeroesComponent (Deep)", () => {
       declarations: [HeroesComponent, HeroComponent],
       providers: [{ provide: HeroService, useValue: mockHeroService }],
     });
+
+    fixture = TestBed.createComponent(HeroesComponent);
   });
 
   it("should create a hero component for each hero", () => {
     // Arrange
-    fixture = TestBed.createComponent(HeroesComponent);
     mockHeroService.getHeroes.and.returnValue(of(HEROES));
 
     // Act (execute ngOninit)
@@ -50,5 +51,25 @@ describe("HeroesComponent (Deep)", () => {
     heroesDEs.forEach((element, i) => {
       expect(element.componentInstance.hero).toEqual(HEROES[i]);
     });
+  });
+
+  it("should call Heroes delete method when Hero delete method is called", () => {
+    // Arrange
+    mockHeroService.getHeroes.and.returnValue(of(HEROES));
+    mockHeroService.deleteHero.and.returnValue(of(HEROES[0]));
+    spyOn(fixture.componentInstance, "delete");
+
+    // Act
+    fixture.detectChanges();
+    const heroesDEs = fixture.debugElement.queryAll(
+      By.directive(HeroComponent)
+    );
+
+    heroesDEs[0]
+      .query(By.css("button"))
+      .triggerEventHandler("click", { stopPropagation: () => {} });
+
+    // Assert
+    expect(fixture.componentInstance.delete).toHaveBeenCalledWith(HEROES[0]);
   });
 });
